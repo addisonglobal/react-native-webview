@@ -100,7 +100,7 @@ static NSString *const MessageHanderName = @"ReactNative";
 
     WKWebViewConfiguration *wkWebViewConfig = [WKWebViewConfiguration new];
     wkWebViewConfig.userContentController = [WKUserContentController new];
-    [wkWebViewConfig.userContentController addScriptMessageHandler: self name: MessageHanderName];
+    [wkWebViewConfig.userContentController addScriptMessageHandler: self name: MessageHandlerName];
     wkWebViewConfig.allowsInlineMediaPlayback = _allowsInlineMediaPlayback;
 #if WEBKIT_IOS_10_APIS_AVAILABLE
     wkWebViewConfig.mediaTypesRequiringUserActionForPlayback = _mediaPlaybackRequiresUserAction
@@ -132,7 +132,7 @@ static NSString *const MessageHanderName = @"ReactNative";
     [self setHideKeyboardAccessoryView: _savedHideKeyboardAccessoryView];
     [self visitSource];
   } else {
-    [_webView.configuration.userContentController removeScriptMessageHandlerForName:MessageHanderName];
+    [_webView.configuration.userContentController removeScriptMessageHandlerForName:MessageHandlerName];
   }
 }
 
@@ -182,7 +182,7 @@ static NSString *const MessageHanderName = @"ReactNative";
 
 /**
  * This method is called whenever JavaScript running within the web view calls:
- *   - window.webkit.messageHandlers.[MessageHanderName].postMessage
+ *   - window.[MessageHandlerName].postMessage
  */
 - (void)userContentController:(WKUserContentController *)userContentController
        didReceiveScriptMessage:(WKScriptMessage *)message
@@ -433,31 +433,6 @@ static NSString *const MessageHanderName = @"ReactNative";
 - (void)      webView:(WKWebView *)webView
   didFinishNavigation:(WKNavigation *)navigation
 {
-  if (_messagingEnabled) {
-    #if RCT_DEV
-
-    // Implementation inspired by Lodash.isNative.
-    NSString *isPostMessageNative = @"String(String(window.postMessage) === String(Object.hasOwnProperty).replace('hasOwnProperty', 'postMessage'))";
-    [self evaluateJS: isPostMessageNative thenCall: ^(NSString *result) {
-      if (! [result isEqualToString:@"true"]) {
-        RCTLogError(@"Setting onMessage on a WebView overrides existing values of window.postMessage, but a previous value was defined");
-      }
-    }];
-    #endif
-
-    NSString *source = [NSString stringWithFormat:
-      @"(function() {"
-        "window.originalPostMessage = window.postMessage;"
-
-        "window.postMessage = function(data) {"
-          "window.webkit.messageHandlers.%@.postMessage(String(data));"
-        "};"
-      "})();",
-      MessageHanderName
-    ];
-    [self evaluateJS: source thenCall: nil];
-  }
-
   if (_injectedJavaScript) {
     [self evaluateJS: _injectedJavaScript thenCall: ^(NSString *jsEvaluationValue) {
       NSMutableDictionary *event = [self baseEvent];
