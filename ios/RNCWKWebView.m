@@ -446,6 +446,7 @@ static NSString *const MessageHandlerName = @"ReactNativeBridge";
   [self evaluateJS: source thenCall: callback];
 }
 
+// TODO: figure out how to call restorePostMessage when the overwriteWindowPostMessage prop changes
 - (void)restorePostMessage
           thenCall: (void (^)(NSString*)) callback
 {
@@ -467,9 +468,6 @@ static NSString *const MessageHandlerName = @"ReactNativeBridge";
 {
   if (_messagingEnabled && _overwriteWindowPostMessage) {
     [self overwritePostMessage thenCall: nil];
-  }
-  else {
-    [self restorePostMessage thenCall: nil];
   }
 
   if (_injectedJavaScript) {
