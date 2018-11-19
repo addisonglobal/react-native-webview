@@ -430,8 +430,7 @@ static NSString *const MessageHandlerName = @"ReactNative";
 }
 
 // Start of legacy code which overwrites window.postMessage
-- (void)overwritePostMessage
-          thenCall: (void (^)(NSString*)) callback
+- (void)overwritePostMessageThenCall: (void (^)(NSString*)) callback
 {
   NSString *source = [NSString stringWithFormat:
     @"(function() {"
@@ -447,8 +446,7 @@ static NSString *const MessageHandlerName = @"ReactNative";
 }
 
 // TODO: figure out how to call restorePostMessage when the overwriteWindowPostMessage prop changes
-- (void)restorePostMessage
-          thenCall: (void (^)(NSString*)) callback
+- (void)restorePostMessageThenCall: (void (^)(NSString*)) callback
 {
   NSString *source = [NSString
     @"(function() {"
@@ -467,7 +465,7 @@ static NSString *const MessageHandlerName = @"ReactNative";
   didFinishNavigation:(WKNavigation *)navigation
 {
   if (_messagingEnabled && _overwriteWindowPostMessage) {
-    [self overwritePostMessage thenCall: nil];
+    [self overwritePostMessageThenCall: nil];
   }
 
   if (_injectedJavaScript) {
